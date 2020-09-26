@@ -69,40 +69,32 @@ function getWeather(city) {
 		method: "GET",
 	}).then((res) => {
 		console.log(res);
+		$(".alldays").empty();
 		const fivedaysWeather = [0, 8, 16, 24, 32];
+		let image = (x) =>
+			$("<img>").attr("src", `https://openweathermap.org/img/w/${x}.png`);
 		function row(x) {
-			for (let i = 0; i < fivedaysWeather.length; i++) {
-				return `<tr>
-					<td>${res.list[fivedaysWeather[i]].dt_txt}</td>
-					<td>${$("<img>")
-						.attr(
-							"src",
-							"https://openweathermap.org/img/w/" +
-								res.list[fivedaysWeather[i]].weather[0].icon +
-								".png"
-						)
-						.attr("width", 100)}</td>
-				</tr>`;
-			}
+			let dayDiv = $("<div>")
+				.addClass("dayDiv")
+				.text(res.list[x].dt_txt.substring(0, 10));
+			let image = $("<img>").attr(
+				"src",
+				"https://openweathermap.org/img/w/" +
+					res.list[x].weather[0].icon +
+					".png"
+			);
+			let temp = $("<div>").text(
+				Math.round((res.list[x].main.temp - 273.17) * 1.8 + 32) + " F"
+			);
+			let humid = $("<div>").text(res.list[x].main.humidity + " humidity");
+			let mainDiv = $("<div>")
+				.append(dayDiv, image, temp, humid)
+				.addClass("subMainDiv");
+			$(".alldays").append(mainDiv);
 		}
-		$(".alldays").html(
-			`
-			<table>
-				<thead>
-					<tr>
-						<td>Date</td>
-						<td>Weather</td>
-						<td>Temperature</td>
-						<td>Humidity</td>
-					</tr>
-				</thead>
-				<tbody>
-					${row()}
-				</tbody>
-			</table>
-			
-			`
-		);
+		for (let i = 0; i < fivedaysWeather.length; i++) {
+			row(fivedaysWeather[i]);
+		}
 	});
 }
 
