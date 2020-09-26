@@ -9,6 +9,8 @@ $(".citySearchButton").click(() => {
 		allCitiesFromStorage.push(searchCityName);
 		localStorage.setItem("myCities", JSON.stringify(allCitiesFromStorage));
 	}
+	newButton();
+	getWeather(searchCityName);
 });
 
 $(document).ready(() => {
@@ -18,7 +20,11 @@ $(document).ready(() => {
 	if (allCitiesFromStorage === null) {
 		localStorage.setItem("myCities", JSON.stringify(userCities));
 	}
+	newButton();
+});
 
+function newButton() {
+	$(".cities").empty();
 	for (let i = 0; i < allCitiesFromStorage.length; i++) {
 		let cityButton = $("<button>");
 		let newCity = cityButton
@@ -27,6 +33,12 @@ $(document).ready(() => {
 			.val(allCitiesFromStorage[i]);
 		$(".cities").append(newCity);
 	}
+}
+
+$(document).on("click", ".cityButton", function () {
+	let getCityName = $(this).val();
+	console.log(getCityName);
+	getWeather(getCityName);
 });
 
 function getWeather(city) {
@@ -51,6 +63,46 @@ function getWeather(city) {
 		}).then(function (res) {
 			$(".currentUV").text(res.value);
 		});
+	});
+	$.ajax({
+		url: `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=3e7be9a349d1dc778f314703bd387a93`,
+		method: "GET",
+	}).then((res) => {
+		console.log(res);
+		const fivedaysWeather = [0, 8, 16, 24, 32];
+		function row(x) {
+			for (let i = 0; i < fivedaysWeather.length; i++) {
+				return `<tr>
+					<td>${res.list[fivedaysWeather[i]].dt_txt}</td>
+					<td>${$("<img>")
+						.attr(
+							"src",
+							"https://openweathermap.org/img/w/" +
+								res.list[fivedaysWeather[i]].weather[0].icon +
+								".png"
+						)
+						.attr("width", 100)}</td>
+				</tr>`;
+			}
+		}
+		$(".alldays").html(
+			`
+			<table>
+				<thead>
+					<tr>
+						<td>Date</td>
+						<td>Weather</td>
+						<td>Temperature</td>
+						<td>Humidity</td>
+					</tr>
+				</thead>
+				<tbody>
+					${row()}
+				</tbody>
+			</table>
+			
+			`
+		);
 	});
 }
 
